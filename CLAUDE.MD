@@ -185,12 +185,24 @@ Create files in `meta/`:
 
 ## Git Hygiene (MANDATORY for every agent session)
 
-- **Every logical unit of work must be committed AND pushed.** "Committed but not pushed" is not acceptable — the remote is the source of truth.
-- Commit granularity: one logical unit = one commit. Don't batch unrelated edits. Don't leave uncommitted changes at session end.
-- Push after EVERY commit (not just at the end): `git push origin <current-branch>`. If the push fails (auth, network, divergence), stop and diagnose — do not continue making more local commits on top of an un-pushed pile.
-- If the branch has diverged from origin (someone else pushed), `git pull --rebase` first, resolve conflicts, then push. Do not force-push `main` or any shared branch.
-- Commit messages: imperative mood, one-line subject ≤ 72 chars, optional body for the "why". Follow the existing pattern (`Init: ...`, `Add: ...`, `Update: ...`, `Fix: ...`).
-- Before exiting a session, verify `git status` is clean AND `git rev-list --count HEAD...origin/<branch>` is `0 0` (local fully in sync with remote).
+This is a knowledge-research repository: the remote is the source of truth, knowledge accumulates across many short agent sessions, and the local working tree is always disposable. The pipeline below is non-negotiable.
+
+**1. Pull first — ALWAYS.** Before doing any work at the start of a session, AND before every commit:
+```
+git fetch origin
+git pull --rebase origin <current-branch>
+```
+Another session or a human may have pushed while you were planning. Working on stale state produces merge conflicts, duplicate Q-numbers, or overwritten reasoning. Resolve any conflicts before continuing — do NOT force-push to bypass them.
+
+**2. Commit every logical unit.** One unit = one commit. Don't batch unrelated edits. Don't leave uncommitted changes at session end. Commit messages: imperative mood, one-line subject ≤ 72 chars, optional body for the "why". Follow the existing pattern (`Init: ...`, `Add: ...`, `Update: ...`, `Fix: ...`).
+
+**3. Push after EVERY commit — not just at the end.** `git push origin <current-branch>`. "Committed but not pushed" is a failure state. If the push fails (auth, network, divergence), stop and diagnose — do not continue making more local commits on top of an un-pushed pile. Never force-push `main` or any shared branch.
+
+**4. Exit check.** Before ending a session, both must be true:
+- `git status` shows a clean tree.
+- `git rev-list --left-right --count HEAD...origin/<branch>` reports `0 0` (local fully in sync with remote).
+
+If either is violated, fix before exiting — that's the whole point of this pipeline.
 
 ---
 
