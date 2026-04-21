@@ -183,6 +183,15 @@ Create files in `meta/`:
 - Never overwrite past reasoning; append and evolve
 - Always preserve uncertainty and alternative views
 
+## Git Hygiene (MANDATORY for every agent session)
+
+- **Every logical unit of work must be committed AND pushed.** "Committed but not pushed" is not acceptable — the remote is the source of truth.
+- Commit granularity: one logical unit = one commit. Don't batch unrelated edits. Don't leave uncommitted changes at session end.
+- Push after EVERY commit (not just at the end): `git push origin <current-branch>`. If the push fails (auth, network, divergence), stop and diagnose — do not continue making more local commits on top of an un-pushed pile.
+- If the branch has diverged from origin (someone else pushed), `git pull --rebase` first, resolve conflicts, then push. Do not force-push `main` or any shared branch.
+- Commit messages: imperative mood, one-line subject ≤ 72 chars, optional body for the "why". Follow the existing pattern (`Init: ...`, `Add: ...`, `Update: ...`, `Fix: ...`).
+- Before exiting a session, verify `git status` is clean AND `git rev-list --count HEAD...origin/<branch>` is `0 0` (local fully in sync with remote).
+
 ---
 
 ## Output Requirement
